@@ -1,0 +1,108 @@
+* ae/demesne
+
+https://github.com/EducatedAlmost/demesne
+
+What does the application do?
+
+** Usage
+
+Run the project directly, via =:exec-fn=:
+
+#+BEGIN_EXAMPLE
+  $ clojure -X:run-x
+  Hello, Clojure!
+#+END_EXAMPLE
+
+Run the project, overriding the name to be greeted:
+
+#+BEGIN_EXAMPLE
+  $ clojure -X:run-x :name '"Someone"'
+  Hello, Someone!
+#+END_EXAMPLE
+
+Run the project directly, via =:main-opts= (=-m ae.demesne=):
+
+#+BEGIN_EXAMPLE
+  $ clojure -M:run-m
+  Hello, World!
+#+END_EXAMPLE
+
+Run the project, overriding the name to be greeted:
+
+#+BEGIN_EXAMPLE
+  $ clojure -M:run-m Via-Main
+  Hello, Via-Main!
+#+END_EXAMPLE
+
+Run the project's tests (they'll fail until you edit them):
+
+#+BEGIN_EXAMPLE
+  $ clojure -T:build test
+#+END_EXAMPLE
+
+Run the project's CI pipeline and build an uberjar (this will fail until
+you edit the tests to pass):
+
+#+BEGIN_EXAMPLE
+  $ clojure -T:build ci
+#+END_EXAMPLE
+
+This will produce an updated =pom.xml= file with synchronized
+dependencies inside the =META-INF= directory inside =target/classes= and
+the uberjar in =target=. You can update the version (and SCM tag)
+information in generated =pom.xml= by updating =build.clj=.
+
+If you don't want the =pom.xml= file in your project, you can remove it.
+The =ci= task will still generate a minimal =pom.xml= as part of the
+=uber= task, unless you remove =version= from =build.clj=.
+
+Run that uberjar:
+
+#+BEGIN_EXAMPLE
+  $ java -jar target/demesne-0.1.0-SNAPSHOT.jar
+#+END_EXAMPLE
+
+If you remove =version= from =build.clj=, the uberjar will become
+=target/demesne-standalone.jar=.
+
+
+** API
+
+#+begin_src restclient
+GET http://localhost:8080/create/3
+Content-Type: application/json
+
+{"name": "Bar"}
+#+end_src
+
+#+RESULTS:
+#+BEGIN_SRC js
+{
+  "ae.demesne.event/changes": [
+    {
+      "ae.demesne.event/type": "ae.demesne.event.type/item-created",
+      "ae.demesne.item/id": "3",
+      "ae.demesne.item/name": "Bar"
+    }
+  ],
+  "ae.demesne.item/id": "3",
+  "ae.demesne.item/name": "Bar",
+  "ae.demesne.item/active?": true
+}
+// GET http://localhost:8080/create/3
+// HTTP/1.1 200 OK
+// Date: Wed, 20 Oct 2021 16:09:18 GMT
+// Content-Type: application/json;charset=utf-8
+// Content-Length: 232
+// Server: Jetty(9.4.42.v20210604)
+// Request duration: 0.006057s
+#+END_SRC
+
+** License
+:PROPERTIES:
+:CUSTOM_ID: license
+:END:
+
+Copyright © 2021 AlmostEducated
+
+Distributed under the Eclipse Public License version 1.0.
