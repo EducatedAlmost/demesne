@@ -14,13 +14,17 @@
     (t/testing "Items are properly created with an id and name."
       (let [id 3 name "foo"]
         (t/is (= (sut/handle nil (event/create id name))
-                 {::item/id id ::item/name name ::item/active? true})))))
+                 {::item/id id ::item/name name ::item/active? true
+                  ::event/changes [{::event/type :ae.demesne.event.type/item-created
+                                    ::item/id id ::item/name name}]})))))
 
   (t/testing "handle-deactivate"
     (t/testing "An item can be deactivated."
-      (let [old-item {::item/active? true}
-            event {::event/type :ae.demesne.event.type/deactivate}
-            new-item {::item/active? false}]
+      (let [id "xyz" old-item {::item/id id ::item/active? true}
+            event {::item/id id ::event/type :ae.demesne.event.type/deactivate}
+            new-item {::item/id id ::item/active? false
+                      ::event/changes [{::event/type :ae.demesne.event.type/item-deactivated
+                                        ::item/id id}]}]
         (t/is (= new-item (sut/handle old-item event))))))
 
   (t/testing "handle-check-in"
@@ -28,7 +32,9 @@
     (t/testing "One can check-in items."
       (let [old-item {::item/amount 5}
             event {::event/type :ae.demesne.event.type/check-in ::item/amount 3}
-            new-item {::item/amount 8}]
+            new-item {::item/amount 8
+                      ::event/changes [{::event/type :ae.demesne.event.type/item-checked-in
+                                        ::item/id nil ::item/amount 3}]}]
         (t/is (= new-item (sut/handle old-item event)))))
 
     (t/testing "One cannot check-in a negative quantity."
@@ -43,7 +49,9 @@
       (let [old-item {::item/name "foo"}
             name "bar"
             event {::event/type :ae.demesne.event.type/rename ::item/name name}
-            new-item {::item/name name}]
+            new-item {::item/name name
+                      ::event/changes [{::event/type :ae.demesne.event.type/item-renamed
+                                        ::item/id nil ::item/name name}]}]
         (t/is (= new-item (sut/handle old-item event))))))
 
   ;;
