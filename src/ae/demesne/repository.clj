@@ -8,6 +8,5 @@
 
 (defn save! [{:keys [::item/id ::event/changes] :as item}]
   (evst/save-events! id changes -1)
-  ;; item
   ;; What should be returned?
   item)
