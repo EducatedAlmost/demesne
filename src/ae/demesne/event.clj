@@ -1,5 +1,6 @@
 (ns ae.demesne.event
   (:require [clojure.tools.logging :as log]))
+(create-ns 'ae.demesne.item)
 (alias 'item 'ae.demesne.item)
 
 (defn create [id name]
