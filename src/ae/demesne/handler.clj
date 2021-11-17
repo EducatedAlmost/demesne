@@ -15,7 +15,7 @@
 (defmulti handle
   (fn [_ command] (::command/type command)))
 
-(defmethod handle :default [params]
+(defmethod handle :default [& params]
   (log/warnf "::command.type not recognised: %s" (pp/pprint params))
   ;; Return a failure response?
   nil)
