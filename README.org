@@ -1,51 +1,134 @@
-* ae/demesne
+* æ/Demesne
 
 https://github.com/EducatedAlmost/demesne
+Read the blog post: https://blog.almost.education/posts/demesne
+
+https://github.com/gregoryyoung/m-r/blob/master/SimpleCQRS/Domain.cs
 
 What does the application do?
+
+
+** API
+
+#+begin_src restclient
+GET http://localhost:8080/search/3
+Content-Type: application/json
+
+{}
+#+end_src
+
+#+begin_src restclient
+GET http://localhost:8080/create/3
+Content-Type: application/json
+
+{"name": "Bar"}
+#+end_src
+
+#+begin_src restclient
+GET http://localhost:8080/deactivate/3
+Content-Type: application/json
+
+{}
+#+end_src
+
+#+begin_src restclient
+GET http://localhost:8080/reactivate/3
+Content-Type: application/json
+
+{}
+#+end_src
+
+#+begin_src restclient
+GET http://localhost:8080/check-in/3
+Content-Type: application/json
+
+{"amount": 45}
+#+end_src
+
+#+begin_src restclient
+GET http://localhost:8080/check-out/3
+Content-Type: application/json
+
+{"amount": 25}
+#+end_src
+
+#+begin_src restclient
+GET http://localhost:8080/rename/3
+Content-Type: application/json
+
+{"name": "Foo"}
+#+end_src
+
+** The code
+
+The only datastructures are the command, the event, and the aggregate. Everything else is functions acting upon these datastructures, the first two of which are incredibly simple.
+
+*** Adding new functionality
+
+Let's add a ~reactivate~ function.
+
+- in ~server.clj~ we add a route, ~/reactivate/:id~ and (optionally) we add a helper function ~command/reactivate~ to construct the command.
+- we add a handler to ~handler/handle~ for ~:ae.demesne.command.type/reactivate~.
+- we add a behaviour to the aggregate, ~item/reactivate~, that creates a ~reactivated~ event.
+- we add a application function for that event, ~apply-event :ae.demesne.event.type/item-reactivated~.
+
+*** Why?
+
+1. add an endpoint for user to access
+2. convert the user's action into an internal representation of it
+3. link the command to an aggregate behaviour
+4. raise events for the aggregate behaviour
+
+In this scenario, steps 3 and 4 might seem useless as there is a very simple journey from ~command/reactivate~ ‌→ ~item/reactivate~ → ~event/reactivated~. But in more complex domains, each of these steps becomes necessary. A command can call multiple aggregate behaviours, each of which can raise multiple events, creating a tree of consequences.
+
+- command :: external action or instruction
+- behaviour :: the action the aggregate takes in response to external action
+- event :: the change in state to the aggregate, following the aggregate's action
+
+*** Repository and event store
+
+The command handler retrieves the aggregate with ~get-by-id~ and saves it, by saving its new events, with ~save~.
+
+The repository uses a bespoke in-memory event store that stores events in an atom categorised by aggregate id. This makes the function to retrieve events very simple.
+
+#+begin_src clojure
+(def db (atom {3 [{::item/id 3 ::event/data {...} ::event/version 11}]}))
+
+(defn get-events [id]
+  (map ::event/data (get @db id)))
+#+end_src
+
+~::event/version~ exists to allow for concurrency checks, should one wish commands to fail if the aggregate has been updated since one last queried its state.
 
 ** Usage
 
 Run the project directly, via =:exec-fn=:
 
-#+BEGIN_EXAMPLE
+#+begin_src
   $ clojure -X:run-x
   Hello, Clojure!
-#+END_EXAMPLE
+#+end_src
 
-Run the project, overriding the name to be greeted:
-
-#+BEGIN_EXAMPLE
-  $ clojure -X:run-x :name '"Someone"'
-  Hello, Someone!
-#+END_EXAMPLE
 
 Run the project directly, via =:main-opts= (=-m ae.demesne=):
 
-#+BEGIN_EXAMPLE
+#+begin_src
   $ clojure -M:run-m
   Hello, World!
-#+END_EXAMPLE
+#+end_src
 
-Run the project, overriding the name to be greeted:
-
-#+BEGIN_EXAMPLE
-  $ clojure -M:run-m Via-Main
-  Hello, Via-Main!
-#+END_EXAMPLE
 
 Run the project's tests (they'll fail until you edit them):
 
-#+BEGIN_EXAMPLE
+#+begin_src
   $ clojure -T:build test
-#+END_EXAMPLE
+#+end_src
 
-Run the project's CI pipeline and build an uberjar (this will fail until
-you edit the tests to pass):
+Run the project's CI pipeline and build an uberjar (this will fail until you edit the tests to pass):
 
-#+BEGIN_EXAMPLE
+#+begin_src
   $ clojure -T:build ci
-#+END_EXAMPLE
+#+end_src
 
 This will produce an updated =pom.xml= file with synchronized
 dependencies inside the =META-INF= directory inside =target/classes= and
@@ -58,51 +141,14 @@ The =ci= task will still generate a minimal =pom.xml= as part of the
 
 Run that uberjar:
 
-#+BEGIN_EXAMPLE
+#+begin_src
   $ java -jar target/demesne-0.1.0-SNAPSHOT.jar
-#+END_EXAMPLE
+#+end_src
 
 If you remove =version= from =build.clj=, the uberjar will become
 =target/demesne-standalone.jar=.
 
+** Next steps
 
-** API
-
-#+begin_src restclient
-GET http://localhost:8080/create/3
-Content-Type: application/json
-
-{"name": "Bar"}
-#+end_src
-
-#+RESULTS:
-#+BEGIN_SRC js
-{
-  "ae.demesne.event/changes": [
-    {
-      "ae.demesne.event/type": "ae.demesne.event.type/item-created",
-      "ae.demesne.item/id": "3",
-      "ae.demesne.item/name": "Bar"
-    }
-  ],
-  "ae.demesne.item/id": "3",
-  "ae.demesne.item/name": "Bar",
-  "ae.demesne.item/active?": true
-}
-// GET http://localhost:8080/create/3
-// HTTP/1.1 200 OK
-// Date: Wed, 20 Oct 2021 16:09:18 GMT
-// Content-Type: application/json;charset=utf-8
-// Content-Length: 232
-// Server: Jetty(9.4.42.v20210604)
-// Request duration: 0.006057s
-#+END_SRC
-
-** License
-:PROPERTIES:
-:CUSTOM_ID: license
-:END:
-
-Copyright © 2021 AlmostEducated
-
-Distributed under the Eclipse Public License version 1.0.
+- Add a aggregate behaviour that involves two events.
+- Add specs.
