@@ -1,7 +1,7 @@
 (ns ae.demesne.item)
 
-(create-ns 'ae.demense.event)
-(alias 'event 'ae.demense.event)
+(create-ns 'ae.demesne.event)
+(alias 'event 'ae.demesne.event)
 
 (defn append-event [item event]
   (update item ::event/changes #(concat % [event])))
