@@ -1,9 +1,10 @@
 (ns ae.demesne.eventstore-test
-  (:require
-   [ae.demesne.event :as event]
-   [ae.demesne.eventstore :as sut]
-   [ae.demesne.item :as item]
-   [clojure.test :as t]))
+  (:require [ae.demesne.eventstore :as sut]
+            [ae.demesne.item :as item]
+            [clojure.test :as t]))
+
+(create-ns 'ae.demesne.event)
+(alias 'event 'ae.demesne.event)
 
 (t/deftest versions-match?-test
   (t/testing "Expected version matches present version."

@@ -1,7 +1,9 @@
 (ns ae.demesne.item-test
-  (:require [ae.demesne.event :as event]
-            [ae.demesne.item :as item]
+  (:require [ae.demesne.item :as item]
             [clojure.test :as t]))
+
+(create-ns 'ae.demesne.event)
+(alias 'event 'ae.demesne.event)
 
 (t/deftest append-event-test
   (t/testing "Events can be appended to ::event/changes."
