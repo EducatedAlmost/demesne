@@ -30,6 +30,10 @@
   [item {:keys [::item/id]}]
   (item/deactivate item id))
 
+(defmethod handle :ae.demesne.command.type/reactivate
+  [item {:keys [::item/id]}]
+  (item/reactivate item id))
+
 (defmethod handle :ae.demesne.command.type/check-in
   [item {:keys [::item/id ::item/amount]}]
   (if (< amount 0)

@@ -26,6 +26,9 @@
   (GET "/deactivate/:id" [id]
     (-> id command/deactivate h/handle! ->resp response))
 
+  (GET "/reactivate/:id" [id]
+    (-> id command/reactivate h/handle! ->resp response))
+
   (GET "/check-in/:id" [id amount]
     (-> id (command/check-in amount) h/handle! ->resp response))
 
