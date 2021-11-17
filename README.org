@@ -1,14 +1,16 @@
 * æ/Demesne
 
 https://github.com/EducatedAlmost/demesne
+
 Read the blog post: https://blog.almost.education/posts/demesne
 
-https://github.com/gregoryyoung/m-r/blob/master/SimpleCQRS/Domain.cs
+Demesne is a simple example of [[https://www.martinfowler.com/bliki/CQRS.html][CQRS]], [[https://martinfowler.com/eaaDev/EventSourcing.html][event sourcing]], and [[https://martinfowler.com/bliki/DomainDrivenDesign.html][domain-driven design]] in Clojure. It mimics Greg Young's example application [[https://github.com/gregoryyoung/m-r/blob/master/SimpleCQRS/Domain.cs][m-r]] — in just one third the lines of code (217 vs 674).
 
-What does the application do?
-
+It imagines a warehouse of named item lines; which can be searched for, have instances checked in and out, be deactivated and reactivated, and be renamed. It runs as an HTTP server with endpoints that can easily be called with JSON content when necessary.
 
 ** API
+
+Search for an item:
 
 #+begin_src restclient
 GET http://localhost:8080/search/3
@@ -17,12 +19,16 @@ Content-Type: application/json
 {}
 #+end_src
 
+Create an item:
+
 #+begin_src restclient
 GET http://localhost:8080/create/3
 Content-Type: application/json
 
 {"name": "Bar"}
 #+end_src
+
+Deactivate an item:
 
 #+begin_src restclient
 GET http://localhost:8080/deactivate/3
@@ -31,12 +37,16 @@ Content-Type: application/json
 {}
 #+end_src
 
+Reactivate an item:
+
 #+begin_src restclient
 GET http://localhost:8080/reactivate/3
 Content-Type: application/json
 
 {}
 #+end_src
+
+Check in instances of an item:
 
 #+begin_src restclient
 GET http://localhost:8080/check-in/3
@@ -45,12 +55,16 @@ Content-Type: application/json
 {"amount": 45}
 #+end_src
 
+Check out instances of an item:
+
 #+begin_src restclient
 GET http://localhost:8080/check-out/3
 Content-Type: application/json
 
 {"amount": 25}
 #+end_src
+
+Rename an item:
 
 #+begin_src restclient
 GET http://localhost:8080/rename/3
@@ -61,16 +75,16 @@ Content-Type: application/json
 
 ** The code
 
-The only datastructures are the command, the event, and the aggregate. Everything else is functions acting upon these datastructures, the first two of which are incredibly simple.
+The only datastructures are the command, the event, and the aggregate — the first two of which are very simple and static — everything else is functions.
 
 *** Adding new functionality
 
 Let's add a ~reactivate~ function.
 
-- in ~server.clj~ we add a route, ~/reactivate/:id~ and (optionally) we add a helper function ~command/reactivate~ to construct the command.
-- we add a handler to ~handler/handle~ for ~:ae.demesne.command.type/reactivate~.
-- we add a behaviour to the aggregate, ~item/reactivate~, that creates a ~reactivated~ event.
-- we add a application function for that event, ~apply-event :ae.demesne.event.type/item-reactivated~.
+1. in ~server.clj~ we add a route, ~/reactivate/:id~ and (optionally) we add a helper function ~command/reactivate~ to construct the command.
+2. we add a handler to ~handler/handle~ for ~:ae.demesne.command.type/reactivate~.
+3. we add a behaviour to the aggregate, ~item/reactivate~, that creates a ~reactivated~ event.
+4. we add a application function for that event, ~apply-event :ae.demesne.event.type/item-reactivated~.
 
 *** Why?
 
