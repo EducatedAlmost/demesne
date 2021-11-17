@@ -1,7 +1,7 @@
 (ns ae.demesne.server
   (:require [ae.demesne.handler :as h]
             [ae.demesne.repository :as repo]
-            [ae.demesne.event :as event]
+            [ae.demesne.command :as command]
             [ae.demesne.item :as item]
             [clj-uuid :as uuid]
             [clojure.tools.logging :as log]
@@ -21,19 +21,19 @@
     (-> id repo/get-by-id ->resp response))
 
   (GET "/create/:id" [id name]
-    (-> id (event/create name) h/handle! ->resp response))
+    (-> id (command/create name) h/handle! ->resp response))
 
   (GET "/deactivate/:id" [id]
-    (-> id event/deactivate h/handle! ->resp response))
+    (-> id command/deactivate h/handle! ->resp response))
 
   (GET "/check-in/:id" [id amount]
-    (-> id (event/check-in amount) h/handle! ->resp response))
+    (-> id (command/check-in amount) h/handle! ->resp response))
 
   (GET "/check-out/:id" [id amount]
-    (-> id (event/check-out amount) h/handle! ->resp response))
+    (-> id (command/check-out amount) h/handle! ->resp response))
 
   (GET "/rename/:id" [id name]
-    (-> id (event/rename name) h/handle! ->resp response))
+    (-> id (command/rename name) h/handle! ->resp response))
   ;;
   )
 

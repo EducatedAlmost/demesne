@@ -1,5 +1,7 @@
-(ns ae.demesne.item
-  (:require [ae.demesne.event :as event]))
+(ns ae.demesne.item)
+
+(create-ns 'ae.demense.event)
+(alias 'event 'ae.demense.event)
 
 (defn append-event [item event]
   (update item ::event/changes #(concat % [event])))
@@ -11,8 +13,12 @@
   (assoc item ::id id ::name name ::active? true))
 
 (defmethod apply-event :ae.demesne.event.type/item-deactivated
-  [item event]
+  [item _]
   (assoc item ::active? false))
+
+(defmethod apply-event :ae.demesne.event.type/item-reactivated
+  [item _]
+  (assoc item ::active? true))
 
 (defn increment [x y]
   (+ (or x 0) y))
@@ -43,6 +49,10 @@
 
 (defn deactivate [item id]
   (raise item {::event/type :ae.demesne.event.type/item-deactivated
+               ::id id}))
+
+(defn reactivate [item id]
+  (raise item {::event/type :ae.demesne.event.type/item-reactivated
                ::id id}))
 
 (defn check-in [item id amount]

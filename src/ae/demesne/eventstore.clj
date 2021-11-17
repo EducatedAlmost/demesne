@@ -1,6 +1,8 @@
 (ns ae.demesne.eventstore
-  (:require [ae.demesne.item :as item]
-            [ae.demesne.event :as event]))
+  (:require [ae.demesne.item :as item]))
+
+(create-ns 'ae.demense.event)
+(alias 'event 'ae.demense.event)
 
 (def db (atom {}))
 
